@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\TimeTrait;
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -15,9 +16,11 @@ class Article
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank()]
     private $title;
 
     #[ORM\Column(type: 'text')]
+    #[Assert\NotBlank()]
     private $content;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'articles')]

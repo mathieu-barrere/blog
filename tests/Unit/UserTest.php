@@ -2,79 +2,86 @@
 
 namespace App\Tests\Unit;
 
-use App\Entity\Article;
 use Faker\Factory;
 use App\Entity\User;
-use PHPUnit\Framework\TestCase;
+use App\Entity\Article;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\Tests\Unit\HelperTrait;
 
-class UserTest extends TestCase
+class UserTest extends KernelTestCase
 {
+    use HelperTrait;
+
     private $user;
 
-    protected function setUp(): void
+    public function testValidEntity(): void
     {
-        $this->user = new User();
+        $user = $this->getValidEntity();
+        $this->assertInstanceOf(User::class, $user);
+        $this->validatorHasErrors($user, 0);
     }
 
-    public function testEmail(): void
+    public function testInvalidEmail(): void
     {
-        $faker = Factory::create();
-        $email = $faker->email();
-
-        $response = $this->user->setEmail($email);
-
-        $this->assertInstanceOf(User::class, $response);
-        $this->assertEquals($email, $this->user->getEmail());
+        $user = $this->getValidEntity()->setEmail('invalid');
+        $this->assertInstanceOf(User::class, $user);
+        $this->validatorHasErrors($user, 1);
     }
 
-    public function testUsername(): void
+    public function testInvalidBlankEmail(): void
+    {
+        $user = $this->getValidEntity()->setEmail('');
+        $this->assertInstanceOf(User::class, $user);
+        $this->validatorHasErrors($user, 1);
+    }
+
+    public function testUserIdentifier(): void
     {
         $faker = Factory::create();
-        $email = $faker->email();
-
-        $response = $this->user->setEmail($email);
+        $user = $this->getValidEntity();
         
-        $this->assertInstanceOf(User::class, $response);
-        $this->assertEquals($email, $this->user->getUsername());
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertEquals($user->getEmail(), $user->getUserIdentifier());
     }
 
-    public function testRoles(): void
+    public function testValidRoles(): void
     {
         $roles = ['ROLE_ADMIN'];
 
-        $response = $this->user->setRoles($roles);
+        $user = $this->getValidEntity()->setRoles($roles);
+        $this->validatorHasErrors($user, 0);
 
-        $this->assertInstanceOf(User::class, $response);
-        $this->assertContains('ROLE_ADMIN', $this->user->getRoles());
-        $this->assertContains('ROLE_USER', $this->user->getRoles());
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertContains('ROLE_ADMIN', $user->getRoles());
+        $this->assertContains('ROLE_USER', $user->getRoles());
     }
 
-    public function testPassword(){
-
-        $faker = Factory::create();
-        $password = $faker->password();
-
-        $response = $this->user->setPassword($password);
-
-        $this->assertInstanceOf(User::class, $response);
-        $this->assertEquals($password, $this->user->getPassword());
-    }
-
-public function testAddRemoveArticle(){
+    public function testAddRemoveArticle(){
 
         $article = new Article();
+        $user = new User();
 
-        $response = $this->user->addArticle($article);
-
-        $this->assertInstanceOf(User::class, $response);
-        $this->assertCount(1, $this->user->getArticles());
-        $this->assertTrue($this->user->getArticles()->contains($article));
-
-        $response = $this->user->removeArticle($article);
+        $response = $user->addArticle($article);
 
         $this->assertInstanceOf(User::class, $response);
-        $this->assertCount(0, $this->user->getArticles());
-        $this->assertFalse($this->user->getArticles()->contains($article));
+        $this->assertCount(1, $user->getArticles());
+        $this->assertTrue($user->getArticles()->contains($article));
+
+        $response = $user->removeArticle($article);
+
+        $this->assertInstanceOf(User::class, $response);
+        $this->assertCount(0, $user->getArticles());
+        $this->assertFalse($user->getArticles()->contains($article));
+    }
+
+    public function getValidEntity(): User
+    {
+        $faker = Factory::create();
+
+        return (new User())
+        ->setEmail($faker->email())
+        ->setRoles(['ROLE_ADMIN'])
+        ->setPassword($faker->password());
     }
 
 }
