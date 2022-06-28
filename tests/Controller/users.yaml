@@ -1,0 +1,5 @@
+App\Entity\User:
+    user_1:
+        email: 'john.doe\@test.com'
+        roles: []
+        password: '\$2y\$10\$DEACP.RJ7BELW0eyr9HML.XONfG7NrcnDIU6JG6TKCLyIjlVsvzNe'
